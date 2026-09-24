@@ -526,6 +526,56 @@
     #candle-back { left: 18px; }
     #candle-celebrate { right: 18px; font-size: 1.5rem; }
     #candle-next { position: absolute; right: 20px; bottom: 18px; z-index: 3; }
+
+    .mobile-page-nav { display: none; }
+    .cat-slot-0 { left: 2%; top: 2%; }
+    .cat-slot-1 { left: 37%; top: 74%; }
+    .cat-slot-2 { right: 2%; top: 2%; }
+    .cat-slot-3 { right: 2%; bottom: 3%; }
+
+    @media (max-width: 640px) {
+      body { min-height: 100svh; }
+      .scene { min-height: 100svh; padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)); }
+      .book { width: min(94vw, 430px); height: min(88svh, 720px); min-height: 0; }
+      .spread { display: block; overflow: hidden; border-radius: 20px; }
+      .page { padding: 88px 28px 82px; }
+      .page-left {
+        position: absolute; inset: 0; width: 100%; border-radius: 20px;
+        transition: transform 1.15s cubic-bezier(.22,.61,.36,1), opacity 1s ease;
+      }
+      .turning-leaf {
+        left: 0; width: 100%; transform: translateX(100%);
+        pointer-events: none; transition: transform 1.15s cubic-bezier(.22,.61,.36,1);
+      }
+      .turning-leaf .page-right { border-radius: 20px; }
+      .book.mobile-song .page-left { transform: translateX(-100%); opacity: .25; }
+      .book.mobile-song .turning-leaf { transform: translateX(0); pointer-events: auto; }
+      .book.is-turned .turning-leaf { transform: translateX(-100%); }
+      .leaf-back { display: none; }
+      .book.is-turning .turning-leaf .page-right::after { animation: none; }
+      .mobile-page-nav {
+        position: absolute; bottom: max(18px, env(safe-area-inset-bottom)); z-index: 7;
+        display: grid; width: 48px; height: 48px; place-items: center;
+        border: 0; border-radius: 50%; background: var(--plum); color: #fff;
+        box-shadow: 0 8px 20px rgba(61,40,79,.2); font-size: 1.25rem; cursor: pointer;
+      }
+      #mobile-message-next { right: 20px; }
+      #mobile-song-back { left: 20px; }
+      .surprise { right: 20px; bottom: max(18px, env(safe-area-inset-bottom)); width: 48px; height: 48px; padding: 0; font-style: normal; }
+      .song { margin-bottom: 12px; }
+      .lyrics { max-height: calc(100% - 105px); font-size: clamp(.94rem, 4vw, 1.05rem); line-height: 1.62; }
+      .finale-card, .finale.is-visible .finale-card { grid-template-columns: 1fr; grid-template-rows: 1fr auto; padding: 24px 22px 78px; }
+      .finale-card img { grid-column: 1; grid-row: 1; width: 100%; height: 100%; max-height: 62svh; object-position: center 35%; }
+      .finale h1 { grid-column: 1; grid-row: 2; padding: 16px 4px 0; font-size: clamp(1.65rem, 8vw, 2.4rem); }
+      .close-finale { bottom: max(18px, env(safe-area-inset-bottom)); }
+      #candle-next { bottom: max(18px, env(safe-area-inset-bottom)); }
+      .candle-page video { max-width: min(76%, 320px); max-height: 68%; }
+      .cat { width: 62px; }
+      .cat-slot-0 { left: 5%; top: 2%; }
+      .cat-slot-1 { left: auto; right: 5%; top: 2%; }
+      .cat-slot-2 { left: 5%; right: auto; top: auto; bottom: 2%; }
+      .cat-slot-3 { right: 5%; top: auto; bottom: 2%; }
+    }
   </style>
 </head>
 <body>
@@ -540,6 +590,7 @@
             </p>
             <p class="signature">Com todo o meu carinho.<br><br>Te amo!</p>
           </div>
+          <button class="mobile-page-nav" id="mobile-message-next" type="button" aria-label="Ir para a música">→</button>
         </section>
 
         <section class="page page-right">
@@ -607,6 +658,7 @@
             </div>
           </div>
           <button class="icon-button surprise" id="surprise" type="button" aria-label="Próxima página">→</button>
+          <button class="mobile-page-nav" id="mobile-song-back" type="button" aria-label="Voltar à homenagem">←</button>
         </section>
 
         <div class="cat-layer" id="cat-layer" aria-hidden="true"></div>
@@ -690,6 +742,18 @@
 
       const openBook = () => book.classList.add("is-open");
       const openingTimer = window.setTimeout(openBook, 5000);
+
+      document.getElementById("mobile-message-next").addEventListener("click", event => {
+        event.stopPropagation();
+        book.classList.add("mobile-song");
+        document.getElementById("play").focus({ preventScroll: true });
+      });
+
+      document.getElementById("mobile-song-back").addEventListener("click", event => {
+        event.stopPropagation();
+        book.classList.remove("mobile-song");
+        document.getElementById("mobile-message-next").focus({ preventScroll: true });
+      });
 
       book.addEventListener("click", event => {
         if (book.classList.contains("is-open")) return;
@@ -775,13 +839,12 @@
           if (!book.classList.contains("is-open") || finale.classList.contains("is-visible")) return;
 
           const groupSize = 1 + Math.floor(Math.random() * 3);
+          const availableSlots = [0, 1, 2, 3].sort(() => Math.random() - .5);
           for (let index = 0; index < groupSize; index += 1) {
             const cat = document.createElement("img");
-            cat.className = "cat";
+            cat.className = `cat cat-slot-${availableSlots[index]}`;
             cat.alt = "";
             cat.src = catSources[Math.floor(Math.random() * catSources.length)];
-            cat.style.left = `${3 + Math.random() * 78}%`;
-            cat.style.top = `${4 + Math.random() * 66}%`;
             cat.style.animationDelay = `${-Math.random() * 5}s`;
             catLayer.appendChild(cat);
             activeCats.add(cat);
