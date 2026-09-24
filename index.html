@@ -564,13 +564,28 @@
     .finale-card .final-photo {
       grid-column: 1; grid-row: 2; align-self: center;
       width: 100%; height: 100%; max-height: 70svh;
-      border-radius: 10px; object-fit: cover; object-position: center 35%;
+      border-radius: 10px; object-fit: contain; object-position: center;
+    }
+    .finale-gif-frame {
+      grid-column: 2; grid-row: 2; align-self: center; justify-self: center;
+      width: min(100%, 250px, 50svh); aspect-ratio: 1;
+      position: relative; min-height: 0; overflow: hidden;
+      border-radius: 12px; background: #212124;
+      box-shadow: 0 12px 28px rgba(35,22,45,.2);
     }
     .finale-card .finale-gif {
-      grid-column: 2; grid-row: 2; align-self: center; justify-self: center;
-      display: block; width: min(100%, 220px); max-height: 52svh;
-      aspect-ratio: 314 / 384; object-fit: contain; border-radius: 10px;
-      box-shadow: 0 12px 28px rgba(35,22,45,.2);
+      position: absolute; inset: 0 0 0 auto;
+      display: block; width: 86%; height: 100%; max-width: 100%; max-height: 100%;
+      object-fit: contain; object-position: center; border-radius: 0;
+      transform: none;
+      transition: opacity 3s ease 1.4s;
+    }
+    .finale.is-visible .finale-card .finale-gif { transform: none; }
+    .finale-card .finale-gif-frame img { box-shadow: none; }
+    @media (max-width: 640px) {
+      .finale-gif-frame {
+        grid-column: 2; grid-row: 2; width: min(100%, 38svh, 210px);
+      }
     }
     .finale-celebrate {
       position: absolute; right: 20px; bottom: 18px; z-index: 3;
@@ -585,7 +600,6 @@
       }
       .finale h1 { grid-column: 1 / -1; grid-row: 1; padding: 0; font-size: clamp(1.35rem, 6vw, 1.9rem); }
       .finale-card .final-photo { grid-column: 1; grid-row: 2; max-height: 61svh; }
-      .finale-card .finale-gif { grid-column: 2; grid-row: 2; width: 100%; max-height: 42svh; }
       .finale-celebrate { right: 18px; bottom: max(18px, env(safe-area-inset-bottom)); }
     }
   </style>
@@ -694,7 +708,9 @@
     <div class="finale-card">
       <h1>Feliz aniversário, Irmã!<br>Te amamos!</h1>
       <img class="final-photo" src="WhatsApp%20Image%202026-09-24%20at%2014.37.31%20(1).jpeg" alt="Celiane em uma comemoração">
-      <img class="finale-gif" src="bottom%20(1).gif" alt="Vela de aniversário animada">
+      <div class="finale-gif-frame" aria-label="Vela de aniversário animada">
+        <img class="finale-gif" src="bottom%20(1).gif" alt="">
+      </div>
     </div>
   </section>
   <canvas id="fireworks" aria-hidden="true"></canvas>
