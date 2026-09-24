@@ -566,11 +566,11 @@
       width: 100%; height: 100%; max-height: 70svh;
       border-radius: 10px; object-fit: cover; object-position: center 35%;
     }
-    .finale-card .candle-video {
+    .finale-card .finale-gif {
       grid-column: 2; grid-row: 2; align-self: center; justify-self: center;
-      display: block; width: min(100%, 250px); max-height: 58svh;
-      aspect-ratio: 9 / 16; object-fit: contain; border-radius: 10px;
-      background: #000; box-shadow: 0 12px 28px rgba(35,22,45,.28);
+      display: block; width: min(100%, 220px); max-height: 52svh;
+      aspect-ratio: 314 / 384; object-fit: contain; border-radius: 10px;
+      box-shadow: 0 12px 28px rgba(35,22,45,.2);
     }
     .finale-celebrate {
       position: absolute; right: 20px; bottom: 18px; z-index: 3;
@@ -585,7 +585,7 @@
       }
       .finale h1 { grid-column: 1 / -1; grid-row: 1; padding: 0; font-size: clamp(1.35rem, 6vw, 1.9rem); }
       .finale-card .final-photo { grid-column: 1; grid-row: 2; max-height: 61svh; }
-      .finale-card .candle-video { grid-column: 2; grid-row: 2; width: 100%; max-height: 48svh; }
+      .finale-card .finale-gif { grid-column: 2; grid-row: 2; width: 100%; max-height: 42svh; }
       .finale-celebrate { right: 18px; bottom: max(18px, env(safe-area-inset-bottom)); }
     }
   </style>
@@ -694,7 +694,7 @@
     <div class="finale-card">
       <h1>Feliz aniversário, Irmã!<br>Te amamos!</h1>
       <img class="final-photo" src="WhatsApp%20Image%202026-09-24%20at%2014.37.31%20(1).jpeg" alt="Celiane em uma comemoração">
-      <video class="candle-video" id="candle-video" src="vela.mp4" muted loop playsinline preload="metadata" controls aria-label="Vela de aniversário"></video>
+      <img class="finale-gif" src="bottom%20(1).gif" alt="Vela de aniversário animada">
     </div>
   </section>
   <canvas id="fireworks" aria-hidden="true"></canvas>
@@ -711,7 +711,6 @@
       const finale = document.getElementById("finale");
       const spread = book.querySelector(".spread");
       book.prepend(finale);
-      const candleVideo = document.getElementById("candle-video");
       document.getElementById("finale-celebrate").addEventListener("click", launchFireworks);
       finale.inert = true;
       let fireworksTimer;
@@ -886,8 +885,6 @@
         spread.inert = true;
         finale.inert = false;
         finale.setAttribute("aria-hidden", "false");
-        candleVideo.muted = true;
-        candleVideo.play().catch(() => { /* Native controls remain available. */ });
         fireworksTimer = window.setTimeout(() => {
           book.classList.remove("is-turning");
           book.classList.add("is-settled");
@@ -903,7 +900,6 @@
         if (turning) return;
         turning = true;
         window.clearTimeout(fireworksTimer);
-        candleVideo.pause();
         book.classList.remove("is-settled");
         book.classList.remove("is-turned");
         finale.inert = true;
