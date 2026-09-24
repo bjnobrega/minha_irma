@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171127">
+  <title>Minha Irmã</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f3468'/%3E%3Cpath d='M7 12 10 7l4 4h4l4-4 3 5v9c0 4-4 7-9 7s-9-3-9-7Z' fill='%23ffd16d'/%3E%3Ccircle cx='12' cy='18' r='1.3'/%3E%3Ccircle cx='20' cy='18' r='1.3'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: dark;
+      --night: #171127;
+      --plum: #4f3468;
+      --plum-dark: #2d1d45;
+      --paper: #fff9ea;
+      --paper-deep: #f0dfbf;
+      --ink: #342944;
+      --muted: #776a7b;
+      --gold: #ffd16d;
+      --rose: #ef8f9c;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-width: 320px; min-height: 100%; }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(126, 85, 153, .28), transparent 31%),
+        radial-gradient(circle at 82% 80%, rgba(239, 143, 156, .16), transparent 29%),
+        var(--night);
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    button, input { font: inherit; }
+
+    .scene {
+      display: grid;
+      min-height: 100svh;
+      place-items: center;
+      padding: clamp(12px, 3vw, 32px);
+      perspective: 1800px;
+    }
+
+    .book {
+      position: relative;
+      width: min(920px, 94vw);
+      height: min(680px, 86svh);
+      min-height: 520px;
+      filter: drop-shadow(0 34px 42px rgba(5, 2, 14, .5));
+      transform-style: preserve-3d;
+    }
+
+    .spread {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .58);
+      border-radius: 24px;
+      background: var(--paper);
+      opacity: 0;
+      transform: scale(.95);
+      transition: opacity 2.4s ease 1.8s, transform 3.2s cubic-bezier(.22,.61,.36,1) 1.5s;
+    }
+
+    .book.is-open .spread { opacity: 1; transform: scale(1); }
+
+    .page {
+      position: relative;
+      min-width: 0;
+      padding: clamp(34px, 5vw, 64px);
+      background:
+        linear-gradient(90deg, transparent 90%, rgba(86, 56, 54, .08)),
+        repeating-linear-gradient(0deg, rgba(106, 86, 56, .018) 0 1px, transparent 1px 5px),
+        var(--paper);
+    }
+
+    .page + .page {
+      background:
+        linear-gradient(90deg, rgba(86, 56, 54, .09), transparent 10%),
+        repeating-linear-gradient(0deg, rgba(106, 86, 56, .018) 0 1px, transparent 1px 5px),
+        var(--paper);
+    }
+
+    .page-left::after {
+      position: absolute;
+      top: 0;
+      right: -1px;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, transparent, rgba(70, 45, 48, .18) 18%, rgba(70, 45, 48, .18) 82%, transparent);
+      content: "";
+    }
+
+    .page-content {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      height: 100%;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .salutation {
+      margin: 0 0 1.1rem;
+      color: var(--plum);
+      font-size: clamp(2rem, 5vw, 4.2rem);
+      font-weight: 500;
+      line-height: .95;
+    }
+
+    .message {
+      max-width: 29ch;
+      margin: 0;
+      color: #514658;
+      font-size: clamp(1rem, 1.8vw, 1.24rem);
+      line-height: 1.72;
+    }
+
+    .signature {
+      margin: 1.8rem 0 0;
+      color: #826d80;
+      font-size: clamp(1rem, 1.7vw, 1.18rem);
+      font-style: italic;
+    }
+
+    .song {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 13px;
+      align-items: center;
+      margin-bottom: clamp(18px, 4vh, 34px);
+      font-family: system-ui, sans-serif;
+    }
+
+    .icon-button {
+      display: inline-grid;
+      width: 52px;
+      height: 52px;
+      padding: 0;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      background: var(--plum);
+      box-shadow: 0 8px 20px rgba(61, 40, 79, .22);
+      color: #fff;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: transform .7s cubic-bezier(.22,.61,.36,1), background .7s ease;
+    }
+
+    .icon-button:hover { background: #634580; transform: translateY(-2px); }
+    .icon-button:focus-visible { outline: 3px solid #c87943; outline-offset: 3px; }
+
+    .song-name { min-width: 0; }
+    .song-name strong, .song-name small { display: block; }
+    .song-name strong { color: var(--plum-dark); font-size: .97rem; }
+    .song-name small { margin-top: 3px; color: var(--muted); font-size: .78rem; }
+
+    .progress {
+      grid-column: 1 / -1;
+      width: 100%;
+      height: 18px;
+      margin: 0;
+      appearance: none;
+      border-radius: 10px;
+      background: linear-gradient(90deg, var(--plum) var(--played, 0%), #d9cbe0 var(--played, 0%));
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    .progress::-webkit-slider-thumb {
+      width: 14px;
+      height: 14px;
+      appearance: none;
+      border-radius: 50%;
+      background: var(--plum);
+    }
+
+    .progress:disabled { cursor: default; opacity: .55; }
+
+    .lyrics {
+      position: relative;
+      max-height: 48%;
+      margin: 0;
+      padding-right: 12px;
+      overflow: auto;
+      color: #675a69;
+      font-size: clamp(.9rem, 1.55vw, 1.08rem);
+      line-height: 1.75;
+      scrollbar-color: #b9a8c2 transparent;
+      overscroll-behavior: contain;
+    }
+
+    .lyrics p {
+      margin: 0;
+      padding: .4em 0;
+      color: #887b8c;
+      transition: color .55s ease, opacity .55s ease;
+    }
+    .lyrics p.is-current { color: var(--plum-dark); text-shadow: 0 0 .5px currentColor; }
+    .lyrics p.is-past { opacity: .65; }
+    .lyrics:focus-visible { outline: 1px solid var(--plum); outline-offset: 5px; }
+
+    .surprise {
+      position: absolute;
+      right: clamp(20px, 3vw, 36px);
+      bottom: clamp(20px, 3vw, 34px);
+      z-index: 5;
+      width: 46px;
+      height: 46px;
+      width: auto;
+      height: auto;
+      padding: 8px 13px;
+      border: 1px solid rgba(255, 249, 234, .45);
+      border-radius: 999px;
+      background: rgba(79, 52, 104, .92);
+      color: #fff9ea;
+      font: italic .86rem Georgia, "Times New Roman", serif;
+      letter-spacing: .02em;
+    }
+
+    .cat-layer { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+
+    .cat, .cover-cat {
+      display: block;
+      width: 118px;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 2px rgba(42, 28, 52, .18));
+    }
+
+    .cat {
+      position: absolute;
+      opacity: 0;
+      animation: cat-float 5.5s ease-in-out infinite;
+      transition: opacity 1.6s ease;
+    }
+
+    .cat.is-visible { opacity: .96; }
+
+    .cover-cat { position: absolute; bottom: 7%; width: 82px; }
+    .cover-left .cover-cat { left: 10%; }
+    .cover-right .cover-cat { right: 10%; }
+
+    @keyframes cat-float {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
+    }
+
+    .cover-half {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      z-index: 10;
+      display: grid;
+      width: 50%;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .15);
+      background:
+        radial-gradient(circle at 50% 42%, rgba(255, 209, 109, .12), transparent 24%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,.018) 0 1px, transparent 1px 6px),
+        var(--plum-dark);
+      backface-visibility: hidden;
+      transition: transform 5s cubic-bezier(.22,.61,.36,1), opacity 1.8s ease 3.2s;
+      transform-style: preserve-3d;
+    }
+
+    .cover-left {
+      left: 0;
+      border-radius: 24px 0 0 24px;
+      transform-origin: left center;
+    }
+
+    .cover-right {
+      right: 0;
+      border-radius: 0 24px 24px 0;
+      transform-origin: right center;
+    }
+
+    .book.is-open .cover-left { opacity: 0; transform: rotateY(-112deg) translateZ(12px); }
+    .book.is-open .cover-right { opacity: 0; transform: rotateY(112deg) translateZ(12px); }
+
+    .cover-copy {
+      position: relative;
+      display: grid;
+      width: 100%;
+      height: 100%;
+      place-items: center;
+      color: var(--gold);
+      font-size: clamp(2rem, 5.5vw, 4.8rem);
+      letter-spacing: -.04em;
+      text-shadow: 0 4px 22px rgba(0,0,0,.25);
+    }
+
+    .cover-left .cover-copy { padding-left: 18%; }
+    .cover-right .cover-copy { padding-right: 18%; }
+
+    .cover-cat { position: absolute; bottom: 7%; width: 68px; height: 102px; }
+    .cover-left .cover-cat { left: 10%; background-position: 0 100%; }
+    .cover-right .cover-cat { right: 10%; background-position: 100% 0; }
+
+    .seam {
+      position: absolute;
+      top: 6%;
+      bottom: 6%;
+      left: calc(50% - 1px);
+      z-index: 12;
+      width: 2px;
+      background: linear-gradient(transparent, rgba(255,209,109,.65) 15%, rgba(255,209,109,.65) 85%, transparent);
+      transition: opacity 1.5s ease 2.6s;
+    }
+
+    .book.is-open .seam { opacity: 0; }
+
+    .finale {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      padding: clamp(16px, 4vw, 48px);
+      place-items: center;
+      background: rgba(10, 6, 20, .86);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 2.2s ease;
+    }
+
+    .finale.is-visible { opacity: 1; pointer-events: auto; }
+
+    .finale-card {
+      position: relative;
+      width: min(520px, 91vw);
+      overflow: hidden;
+      border: 8px solid rgba(255, 249, 234, .92);
+      border-radius: 24px;
+      background: #0f0a1a;
+      box-shadow: 0 28px 80px rgba(0,0,0,.55);
+      transform: translateY(28px) scale(.94);
+      transition: transform 2.8s cubic-bezier(.22,.61,.36,1) .25s;
+    }
+
+    .finale.is-visible .finale-card { transform: translateY(0) scale(1); }
+
+    .finale-card img {
+      display: block;
+      width: 100%;
+      max-height: 76svh;
+      object-fit: cover;
+      object-position: center 35%;
+      opacity: 0;
+      transform: scale(1.025);
+      transition: opacity 3.2s ease 1.1s, transform 5s cubic-bezier(.22,.61,.36,1) 1.1s;
+    }
+
+    .finale.is-visible .finale-card img { opacity: 1; transform: scale(1); }
+
+    .finale-card::after {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 45%, rgba(10,6,20,.88));
+      content: "";
+    }
+
+    .finale h1 {
+      position: absolute;
+      right: 8%;
+      bottom: 6%;
+      left: 8%;
+      z-index: 2;
+      margin: 0;
+      color: #fff8e5;
+      font-size: clamp(2rem, 7vw, 4.2rem);
+      font-weight: 500;
+      line-height: 1;
+      text-align: center;
+      text-shadow: 0 4px 20px rgba(0,0,0,.75);
+      text-wrap: balance;
+    }
+
+    .close-finale {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 32;
+      width: 46px;
+      height: 46px;
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: 50%;
+      background: rgba(20,12,33,.65);
+      color: #fff;
+      cursor: pointer;
+      font: 400 1.6rem/1 system-ui, sans-serif;
+    }
+
+    #fireworks { position: fixed; inset: 0; z-index: 31; width: 100%; height: 100%; pointer-events: none; }
+
+    @media (max-width: 640px) {
+      .scene { padding: 8px; }
+      .book { width: 96vw; height: 84svh; min-height: 510px; }
+      .spread, .cover-left { border-radius: 18px 0 0 18px; }
+      .cover-right { border-radius: 0 18px 18px 0; }
+      .page { padding: 25px 15px; }
+      .salutation { font-size: clamp(1.75rem, 9vw, 2.5rem); }
+      .message { font-size: clamp(.9rem, 3.7vw, 1.02rem); line-height: 1.55; }
+      .signature { margin-top: 1rem; }
+      .song { grid-template-columns: auto 1fr; gap: 9px; }
+      .song .surprise { position: absolute; }
+      .icon-button { width: 44px; height: 44px; }
+      .lyrics { max-height: 43%; font-size: .88rem; line-height: 1.58; }
+      .cat { width: 76px; }
+      .cover-cat { width: 60px; }
+      .surprise { right: 12px; bottom: 12px; }
+    }
+
+    @media (max-height: 590px) and (orientation: landscape) {
+      .book { height: 94svh; min-height: 0; }
+      .page { padding: 24px 36px; }
+      .message { line-height: 1.48; }
+      .lyrics { max-height: 38%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cover-half, .spread, .finale, .finale-card, .finale-card img, .cat { transition-duration: .01ms; transition-delay: 0s; }
+      .cat { animation: none; }
+    }
+    /* The surprise lives on the next spread, beneath the turning sheet. */
+    .book { perspective: 2000px; }
+    .spread { z-index: 2; overflow: visible; background: transparent; perspective: 2400px; }
+    .page-left { border-radius: 24px 0 0 24px; }
+    .turning-leaf {
+      position: absolute; left: 50%; top: 0; width: 50%; height: 100%;
+      z-index: 4; transform-origin: 0 50%; transform-style: preserve-3d;
+      transition: transform 3.2s cubic-bezier(.42,0,.22,1);
+    }
+    .turning-leaf .page-right, .leaf-back {
+      position: absolute; inset: 0; border-radius: 0 24px 24px 0;
+      backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    }
+    .turning-leaf .page-right {
+      background: linear-gradient(90deg, rgba(86,56,54,.09), transparent 10%), var(--paper);
+      transform: translateZ(.5px);
+    }
+    .leaf-back {
+      display: grid; place-items: center; padding: clamp(20px, 4vw, 50px);
+      transform: rotateY(180deg) translateZ(.5px); border-radius: 24px 0 0 24px;
+      background: linear-gradient(270deg, rgba(86,56,54,.09), transparent 12%), var(--paper);
+    }
+    .leaf-back h1 {
+      margin: 0; color: var(--plum); text-align: center; text-wrap: balance;
+      font-size: clamp(1.8rem, 5vw, 3.8rem); font-weight: 500; line-height: 1.15;
+    }
+    .turning-leaf .page-right::after, .leaf-back::after {
+      content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+      background: linear-gradient(90deg, rgba(49,28,54,.28), transparent 80%); opacity: 0;
+    }
+    .book.is-turning .turning-leaf .page-right::after,
+    .book.is-turning .leaf-back::after { animation: fold-shadow 3.2s ease both; }
+    @keyframes fold-shadow { 0%, 100% { opacity: 0; } 45%, 55% { opacity: 1; } }
+    .book.is-open .cover-half, .book.is-open .seam { pointer-events: none; }
+    .book.is-turned .spread { pointer-events: none; }
+    .book.is-turned .turning-leaf { transform: rotateY(-180deg); }
+    .book.is-settled .spread { visibility: hidden; }
+    .book .finale {
+      position: absolute; inset: 0; z-index: 1;
+      padding: 0; border-radius: 24px;
+      background: var(--paper);
+      transition: opacity 2s ease;
+    }
+    .finale-card, .finale.is-visible .finale-card {
+      display: grid; grid-template-columns: 1fr 1fr; align-items: center;
+      width: 100%; height: 100%; padding: clamp(16px, 3vw, 36px);
+      border: 0; background: transparent; box-shadow: none; transform: none;
+    }
+    .finale-card::after { display: none; }
+    .finale-card img {
+      grid-column: 2; grid-row: 1; height: 78%; max-height: 100%;
+      border-radius: 8px; object-fit: cover;
+      transition: opacity 3s ease 1.4s, transform 4s ease 1.4s;
+    }
+    .finale h1 {
+      position: static; grid-column: 1; grid-row: 1;
+      padding: 15px; color: var(--plum); text-shadow: none;
+      font-size: clamp(1.8rem, 5vw, 3.8rem); line-height: 1.15;
+      opacity: 0; transition: opacity 2.4s ease 1s;
+    }
+    .finale.is-visible h1 { opacity: 1; }
+    .close-finale {
+      position: absolute; left: 20px; bottom: 18px; top: auto; right: auto;
+      width: auto; height: auto; padding: 8px;
+      border: 0; background: transparent; color: var(--plum);
+      font: italic .9rem Georgia, serif;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .turning-leaf { transition-duration: .01ms; }
+      .book.is-turning .turning-leaf .page-right::after,
+      .book.is-turning .leaf-back::after { animation: none; }
+    }
+    .candle-page {
+      position: absolute; inset: 0; z-index: 8; display: grid; place-items: center;
+      overflow: hidden; border-radius: 24px; background: #171127;
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity 1.8s ease, visibility 0s 1.8s;
+    }
+    .candle-page.is-visible { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
+    .candle-page video { height: 100%; width: 100%; object-fit: contain; }
+    .candle-page button { position: absolute; bottom: 18px; border: 0; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; background: #fff9eae6; color: #4f3468; }
+    #candle-back { left: 18px; }
+    #candle-celebrate { right: 18px; font-size: 1.5rem; }
+    #candle-next { position: absolute; right: 20px; bottom: 18px; z-index: 3; }
+  </style>
+</head>
+<body>
+  <main class="scene">
+    <article class="book" id="book" aria-label="Cartão para minha irmã">
+      <div class="spread">
+        <section class="page page-left">
+          <div class="page-content">
+            <h2 class="salutation">Irmã amada,</h2>
+            <p class="message">
+              Essa é uma singela homenagem pra quem sempre cuidou de mim e agora cuida do meu filho.
+            </p>
+            <p class="signature">Com todo o meu carinho.<br><br>Te amo!</p>
+          </div>
+        </section>
+
+        <section class="page page-right">
+          <div class="page-content">
+            <div class="song">
+              <button class="icon-button" id="play" type="button" aria-label="Reproduzir música" title="Reproduzir música">▶</button>
+              <div class="song-name">
+                <strong>Meu irmão</strong>
+                <small>Toquinho</small>
+              </div>
+              <input class="progress" id="progress" type="range" min="0" max="100" value="0" aria-label="Posição da música">
+            </div>
+            <div class="lyrics" id="lyrics" role="region" aria-label="Letra da música" tabindex="0">
+<p data-time="0.68">Meu irmão,</p>
+<p data-time="2.93">Faz muito tempo faz</p>
+<p data-time="4.26">Que eu não te canto</p>
+<p data-time="5.83">Uma canção.</p>
+<p data-time="7.08">Que eu não te conto uma aventura,</p>
+<p data-time="10.28">Um sonho, uma ilusão.</p>
+<p data-time="12.55">Que eu não me sento calmamente</p>
+<p data-time="16.48">Junto com você.</p>
+<p data-time="20.73">O tempo passa...</p>
+<p data-time="22.74">Meu irmão,</p>
+<p data-time="25.11">Comigo os dias normalmente</p>
+<p data-time="28.58">Cumprem sua função</p>
+<p data-time="30.95">Entre sinuca, futebol,</p>
+<p data-time="34.09">Amor e violão.</p>
+<p data-time="36.38">Mas quando o tempo escurece,</p>
+<p data-time="40.04">Vêm os temporais,</p>
+<p data-time="43.13">E nem blasfêmias, crenças, preces</p>
+<p data-time="46.09">Não ajudam mais,</p>
+<p data-time="47.66">E a gente perde a paz...</p>
+<p data-time="51.26">Aí eu lembro de você</p>
+<p data-time="54.08">E essa lembrança me agiganta.</p>
+<p data-time="57.36">Me faz vencer a dor</p>
+<p data-time="60.78">E quando caio me levanta.</p>
+<p data-time="63.12">Me faz conter o tempo</p>
+<p data-time="66.22">E põe o mundo inteiro</p>
+<p data-time="68.52">Em minhas mãos...</p>
+<p data-time="73.75">Você meu grande herói,</p>
+<p data-time="77.69">Mais poderoso que o inimigo.</p>
+<p data-time="81.83">Você, constante amigo,</p>
+<p data-time="83.32">Meu distante companheiro.</p>
+<p data-time="86.07">Você, que o tempo inteiro</p>
+<p data-time="89.49">Não tem medo do perigo, não.</p>
+<p data-time="108.54">Mas quando o tempo escurece,</p>
+<p data-time="109.93">Vêm os temporais,</p>
+<p data-time="111.92">E nem blasfêmias, crenças, preces</p>
+<p data-time="115.74">Não ajudam mais,</p>
+<p data-time="118.38">E a gente perde a paz...</p>
+<p data-time="121.09">Aí eu lembro de você</p>
+<p data-time="124.19">E essa lembrança me agiganta.</p>
+<p data-time="126.93">Me faz vencer a dor</p>
+<p data-time="129.82">E quando caio me levanta.</p>
+<p data-time="132.49">Me faz conter o tempo</p>
+<p data-time="135.19">E põe o mundo inteiro</p>
+<p data-time="138.37">Em minhas mãos...</p>
+<p data-time="142.16">Você meu grande herói,</p>
+<p data-time="146.59">Mais poderoso que o inimigo.</p>
+<p data-time="151.15">Você, constante amigo,</p>
+<p data-time="153.42">Meu distante companheiro.</p>
+<p data-time="156.79">Você, que o tempo inteiro</p>
+<p data-time="160.59">Não tem medo do perigo, não.</p>
+<p data-time="172.37">Meu irmão...</p>
+            </div>
+          </div>
+          <button class="icon-button surprise" id="surprise" type="button" aria-label="Próxima página">→</button>
+        </section>
+
+        <div class="cat-layer" id="cat-layer" aria-hidden="true"></div>
+      </div>
+
+      <div class="cover-half cover-left" aria-hidden="true">
+        <div class="cover-copy">Minha</div>
+        <img class="cover-cat" src="pixellab-Two-cute-cats--one-orange-male-1790273701985.gif" alt="">
+      </div>
+      <div class="cover-half cover-right" aria-hidden="true">
+        <div class="cover-copy">Irmã</div>
+        <img class="cover-cat" src="pixellab-Charming-pixel-art-of-two-styl-1790275254169.gif" alt="">
+      </div>
+      <span class="seam" aria-hidden="true"></span>
+    </article>
+  </main>
+
+  <section class="finale" id="finale" aria-hidden="true" aria-label="Feliz aniversário, minha irmã">
+    <button class="close-finale" id="close-finale" type="button" aria-label="Voltar à homenagem">← voltar</button>
+    <button class="icon-button" id="candle-next" type="button" aria-label="Ver a vela de aniversário">→</button>
+    <div class="finale-card">
+      <img src="WhatsApp%20Image%202026-09-24%20at%2014.37.31%20(1).jpeg" alt="Celiane em uma comemoração">
+      <h1>Feliz aniversário, Irmã!<br>Te amamos!</h1>
+    </div>
+  </section>
+
+  <section class="candle-page" id="candle-page" aria-label="Vela de aniversário" aria-hidden="true" inert>
+    <video id="candle-video" src="vela.mp4" muted loop playsinline preload="metadata" controls></video>
+    <button id="candle-back" type="button" aria-label="Voltar à foto">←</button>
+    <button id="candle-celebrate" type="button" aria-label="Lançar fogos">✧</button>
+  </section>
+  <canvas id="fireworks" aria-hidden="true"></canvas>
+  <audio id="song" preload="metadata">
+    <source src="Toquinho%20-%20Meu%20irm%C3%A3o.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    (() => {
+      const book = document.getElementById("book");
+      const song = document.getElementById("song");
+      const play = document.getElementById("play");
+      const progress = document.getElementById("progress");
+      const finale = document.getElementById("finale");
+      const spread = book.querySelector(".spread");
+      book.prepend(finale);
+      const candlePage = document.getElementById("candle-page");
+      const candleVideo = document.getElementById("candle-video");
+      book.appendChild(candlePage);
+      document.getElementById("candle-next").addEventListener("click", () => {
+        candlePage.inert = false;
+        candlePage.setAttribute("aria-hidden", "false");
+        candlePage.classList.add("is-visible");
+        finale.inert = true;
+        candleVideo.muted = true;
+        candleVideo.play().catch(() => { /* Native controls remain available. */ });
+        document.getElementById("candle-back").focus({ preventScroll: true });
+      });
+      document.getElementById("candle-back").addEventListener("click", () => {
+        candlePage.classList.remove("is-visible");
+        candlePage.setAttribute("aria-hidden", "true");
+        candlePage.inert = true;
+        candleVideo.pause();
+        finale.inert = false;
+        document.getElementById("candle-next").focus({ preventScroll: true });
+      });
+      document.getElementById("candle-celebrate").addEventListener("click", launchFireworks);
+      finale.inert = true;
+      let fireworksTimer;
+      let turning = false;
+      const turnDuration = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 3200;
+      const leaf = document.createElement("div");
+      leaf.className = "turning-leaf";
+      const front = spread.querySelector(".page-right");
+      front.replaceWith(leaf);
+      leaf.appendChild(front);
+      const back = document.createElement("div");
+      back.className = "leaf-back";
+      back.setAttribute("aria-hidden", "true");
+      back.appendChild(finale.querySelector("h1").cloneNode(true));
+      leaf.appendChild(back);
+
+      window.setTimeout(() => book.classList.add("is-open"), 5000);
+      progress.disabled = true;
+
+      const lyrics = document.getElementById("lyrics");
+      const lyricLines = [...lyrics.querySelectorAll("[data-time]")];
+      const lyricTimes = lyricLines.map(line => Number(line.dataset.time));
+      let activeLyric = -1;
+      const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+      function followLyrics(force = false) {
+        let next = -1;
+        for (let index = 0; index < lyricTimes.length; index += 1) {
+          if (lyricTimes[index] > song.currentTime) break;
+          next = index;
+        }
+        if (next === activeLyric && !force) return;
+        activeLyric = next;
+        lyricLines.forEach((line, index) => {
+          line.classList.toggle("is-current", index === next);
+          line.classList.toggle("is-past", index < next);
+          if (index === next) line.setAttribute("aria-current", "true");
+          else line.removeAttribute("aria-current");
+        });
+        const line = lyricLines[next];
+        lyrics.scrollTo({
+          top: line ? Math.max(0, line.offsetTop - (lyrics.clientHeight - line.offsetHeight) / 2) : 0,
+          behavior: reducedMotion.matches ? "auto" : "smooth"
+        });
+      }
+
+      song.addEventListener("timeupdate", () => followLyrics());
+      song.addEventListener("seeked", () => followLyrics(true));
+      window.addEventListener("resize", () => followLyrics(true));
+
+      function syncProgress() {
+        if (!Number.isFinite(song.duration) || song.duration <= 0) return;
+        progress.disabled = false;
+        progress.value = song.currentTime / song.duration * 100;
+        progress.style.setProperty("--played", `${progress.value}%`);
+      }
+
+      song.addEventListener("loadedmetadata", syncProgress);
+      song.addEventListener("durationchange", syncProgress);
+
+      const catLayer = document.getElementById("cat-layer");
+      const catSources = [
+        "pixellab-Two-cute-cats--one-orange-male-1790274037852.gif",
+        "pixellab-Charming-pixel-art-of-two-styl-1790275254169.gif",
+        "pixellab-Two-cute-cats--one-orange-male-1790273701985.gif"
+      ];
+      const activeCats = new Set();
+      let nextCatTimer;
+      let catCycleTimer;
+      const catFadeMs = 1600;
+
+      function removeActiveCats() {
+        const cats = [...activeCats];
+        cats.forEach(cat => cat.classList.remove("is-visible"));
+        window.setTimeout(() => {
+          cats.forEach(cat => {
+            cat.remove();
+            activeCats.delete(cat);
+          });
+        }, catFadeMs + 80);
+      }
+
+      function showRandomCat() {
+        if (!book.classList.contains("is-open") || finale.classList.contains("is-visible")) return;
+        const oldCats = [...activeCats];
+        oldCats.forEach(cat => cat.classList.remove("is-visible"));
+
+        window.setTimeout(() => {
+          oldCats.forEach(cat => {
+            cat.remove();
+            activeCats.delete(cat);
+          });
+          if (!book.classList.contains("is-open") || finale.classList.contains("is-visible")) return;
+
+          const groupSize = 1 + Math.floor(Math.random() * 3);
+          for (let index = 0; index < groupSize; index += 1) {
+            const cat = document.createElement("img");
+            cat.className = "cat";
+            cat.alt = "";
+            cat.src = catSources[Math.floor(Math.random() * catSources.length)];
+            cat.style.left = `${3 + Math.random() * 78}%`;
+            cat.style.top = `${4 + Math.random() * 66}%`;
+            cat.style.animationDelay = `${-Math.random() * 5}s`;
+            catLayer.appendChild(cat);
+            activeCats.add(cat);
+            requestAnimationFrame(() => cat.classList.add("is-visible"));
+          }
+
+          catCycleTimer = window.setTimeout(showRandomCat, 5500 + Math.random() * 4500);
+        }, oldCats.length ? catFadeMs : 0);
+      }
+
+      window.setTimeout(showRandomCat, 9500);
+
+      play.addEventListener("click", async () => {
+        if (song.paused) {
+          try {
+            await song.play();
+            play.textContent = "❚❚";
+            play.setAttribute("aria-label", "Pausar música");
+            play.title = "Pausar música";
+          } catch (_) {}
+        } else {
+          song.pause();
+          play.textContent = "▶";
+          play.setAttribute("aria-label", "Continuar música");
+          play.title = "Continuar música";
+        }
+      });
+
+      song.addEventListener("timeupdate", () => {
+        if (Number.isFinite(song.duration) && song.duration > 0) {
+          syncProgress();
+        }
+      });
+
+      progress.addEventListener("input", () => {
+        if (Number.isFinite(song.duration) && song.duration > 0) {
+          progress.style.setProperty("--played", `${progress.value}%`);
+          song.currentTime = progress.value / 100 * song.duration;
+        }
+      });
+
+      function showFinale() {
+        if (turning || finale.classList.contains("is-visible")) return;
+        turning = true;
+        book.classList.add("is-turning");
+        window.clearTimeout(nextCatTimer);
+        window.clearTimeout(catCycleTimer);
+        removeActiveCats();
+        finale.classList.add("is-visible");
+        book.classList.add("is-turned");
+        spread.inert = true;
+        finale.inert = false;
+        finale.setAttribute("aria-hidden", "false");
+        fireworksTimer = window.setTimeout(() => {
+          book.classList.remove("is-turning");
+          book.classList.add("is-settled");
+          turning = false;
+          launchFireworks();
+          document.getElementById("close-finale").focus({ preventScroll: true });
+        }, turnDuration);
+      }
+
+      document.getElementById("surprise").addEventListener("click", showFinale);
+      song.addEventListener("ended", showFinale);
+      document.getElementById("close-finale").addEventListener("click", () => {
+        if (turning) return;
+        turning = true;
+        window.clearTimeout(fireworksTimer);
+        book.classList.remove("is-settled");
+        book.classList.remove("is-turned");
+        finale.inert = true;
+        window.setTimeout(() => {
+          turning = false;
+          spread.inert = false;
+          finale.classList.remove("is-visible");
+          finale.setAttribute("aria-hidden", "true");
+          document.getElementById("surprise").focus({ preventScroll: true });
+        }, turnDuration);
+        window.clearTimeout(catCycleTimer);
+        catCycleTimer = window.setTimeout(showRandomCat, 4000);
+      });
+
+      const canvas = document.getElementById("fireworks");
+      const ctx = canvas.getContext("2d");
+      const colors = ["#ffd16d", "#ef8f9c", "#7dd4e5", "#b99ae8", "#fff9ea", "#ff8c5a"];
+      let particles = [];
+      let animationFrame = 0;
+      let lastFrame = 0;
+
+      function resizeCanvas() {
+        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(innerWidth * ratio);
+        canvas.height = Math.round(innerHeight * ratio);
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      }
+
+      function launchFireworks() {
+        cancelAnimationFrame(animationFrame);
+        particles = [];
+        const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const bursts = reduced ? 2 : 9;
+        const sparks = reduced ? 18 : 48;
+
+        for (let burst = 0; burst < bursts; burst += 1) {
+          const x = innerWidth * (.08 + Math.random() * .84);
+          const y = innerHeight * (.08 + Math.random() * .58);
+          for (let index = 0; index < sparks; index += 1) {
+            const angle = Math.PI * 2 * index / sparks + Math.random() * .08;
+            const speed = 1.5 + Math.random() * 4.8;
+            particles.push({
+              x, y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              life: 1,
+              delay: burst * (reduced ? 80 : 235),
+              color: colors[Math.floor(Math.random() * colors.length)],
+              size: 1.4 + Math.random() * 2.7
+            });
+          }
+        }
+
+        lastFrame = performance.now();
+        animationFrame = requestAnimationFrame(drawFireworks);
+      }
+
+      function drawFireworks(now) {
+        const elapsed = Math.min(now - lastFrame, 40);
+        lastFrame = now;
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+        let alive = false;
+
+        for (const particle of particles) {
+          if (particle.delay > 0) {
+            particle.delay -= elapsed;
+            alive = true;
+            continue;
+          }
+          if (particle.life <= 0) continue;
+          alive = true;
+          particle.x += particle.vx * elapsed / 16;
+          particle.y += particle.vy * elapsed / 16;
+          particle.vy += .038 * elapsed / 16;
+          particle.vx *= .995;
+          particle.life -= elapsed / 1350;
+          ctx.globalAlpha = Math.max(0, particle.life);
+          ctx.fillStyle = particle.color;
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.globalAlpha = 1;
+        if (alive) animationFrame = requestAnimationFrame(drawFireworks);
+        else ctx.clearRect(0, 0, innerWidth, innerHeight);
+      }
+
+      addEventListener("resize", resizeCanvas);
+      resizeCanvas();
+    })();
+  </script>
+</body>
+</html>
