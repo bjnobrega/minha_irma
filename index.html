@@ -685,7 +685,15 @@
       back.appendChild(finale.querySelector("h1").cloneNode(true));
       leaf.appendChild(back);
 
-      window.setTimeout(() => book.classList.add("is-open"), 5000);
+      const openBook = () => book.classList.add("is-open");
+      const openingTimer = window.setTimeout(openBook, 5000);
+
+      book.addEventListener("click", event => {
+        if (book.classList.contains("is-open")) return;
+        event.preventDefault();
+        window.clearTimeout(openingTimer);
+        openBook();
+      });
       progress.disabled = true;
 
       const lyrics = document.getElementById("lyrics");
